@@ -19,7 +19,7 @@ $vagrant_pool = (ENV['VAGRANT_POOL'] unless
                   (ENV['VAGRANT_POOL'].nil? or ENV['VAGRANT_POOL'].empty?))
 # Used for matrix builds to similar setups on the same node without vagrant
 # machine name clashes.
-$libvirt_prefix = ENV['TARGET'] || "kubevirt"
+$libvirt_prefix = ENV['TARGET'] || "splitwood"
 
 $config = Hash[*File.read('hack/config-default.sh').split(/=|\n/)]
 if File.file?('hack/config-local.sh') then
@@ -44,6 +44,10 @@ Vagrant.configure(2) do |config|
       domain.cpus = 2
       domain.nested = true  # enable nested virtualization
       domain.cpu_mode = "host-model"
+
+      domain.storage :file, :size => '100G'
+      domain.storage :file, :size => '100G'
+      domain.storage :file, :size => '100G'
 
       if $use_rng then
           # Will be part of vagrant-libvirt 0.0.36:
@@ -97,6 +101,7 @@ Vagrant.configure(2) do |config|
         export NETWORK_PROVIDER=#{$network_provider}
         cd /vagrant/cluster/vagrant
         bash setup_kubernetes_master.sh
+        bash setup_storage_master.sh
         set +x
         echo -e "\033[0;32m Deployment was successful!"
         echo -e "Cockpit is accessible at https://#{$master_ip}:9090."
